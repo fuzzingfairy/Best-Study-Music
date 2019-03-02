@@ -1,29 +1,16 @@
 import spotipy
 import spotipy.util as util
 import random
-import pickle
 import time
 import thread
 from flask import Flask
 import flask
+import sqlite3
+import secret
 
-# tries to load saved data
-try:
-    focus = pickle.load(open("stats.pickle","rb"))
-except:
-    # focus playlist to choose from
-    focus = {"spotify:user:spotify:playlist:37i9dQZF1DWWQRwui0ExPn":0,
-         "spotify:user:spotify:playlist:37i9dQZF1DX4sWSpwq3LiO":0,
-         "spotify:user:spotify:playlist:37i9dQZF1DWZeKCadgRdKQ":0,
-         "spotify:user:spotify:playlist:37i9dQZF1DX4PP3DA4J0N8":0,
-         "spotify:user:spotify:playlist:37i9dQZF1DWWTdxbiocWOL":0,
-         "spotify:user:spotify:playlist:37i9dQZF1DWXLeA8Omikj7":0}
-    
-    # Log in to spotify
+
 CACHE = '.spotipyoauthcache'
-CLIENT_ID='XXXXXXX'
-CLIENT_SECRET='XXXXXXX'
-REDIRECT_URI='XXXXXXXX'
+
 scope   ="""user-read-email
     playlist-read-private
     playlist-modify-private
@@ -43,7 +30,7 @@ scope   ="""user-read-email
     user-follow-modify
     user-library-modify
     user-library-read"""
-spotifyoauth= spotipy.oauth2.SpotifyOAuth(client_id=CLIENT_ID,client_secret=CLIENT_SECRET,redirect_uri=REDIRECT_URI,scope=scope,cache_path=CACHE)
+spotifyoauth= spotipy.oauth2.SpotifyOAuth(client_id=secret.CLIENT_ID,client_secret=secret.CLIENT_SECRET,redirect_uri=secret.REDIRECT_URI,scope=scope,cache_path=CACHE)
 # default to cached token
 tokeninfo = spotifyoauth.get_cached_token()
 
@@ -57,25 +44,47 @@ if not tokeninfo:
     responsecode = spotifyoauth.parse_response_code(url)
     tokeninfo = spotifyoauth.get_access_token(responsecode)
     
-print("adding new playlists")
+print("searchin for new playlists")
 
 sp = spotipy.Spotify(tokeninfo['access_token'])
-for i in sp.search("focus",type='playlist')['playlists']['items']:
-    if i['uri'] not in focus.keys():
-       print("adding playlist: " + i['name'])
-       focus[i['uri']] = 0
+
+def getName(uri):
+    try:
+        username = uri.split(':')[2]
+        playlist_id = uri.split(':')[4]
+        return sp.user_playlist(username, playlist_id)["name"]
+    except:
+        username = "spotify"
+        playlist_id = uri.split(':')[2]
+        return sp.user_playlist(username, playlist_id)["name"]
+
+conn = sqlite3.connect('tracks.db')
+c = conn.cursor()
     
-app = Flask(__name__)
+for i in sp.search("focus",type='playlist')['playlists']['items']:
+    c.execute("select uri from lookup where uri = '" +i['uri'] + "';")
+    found = c.fetchone()
+    if not found:
+        name = getName(i['uri'])
+        print("adding playlist " + name)
+        c.execute("INSERT INTO LOOKUP VALUES ('"+ i['uri'] + "','" + name + "')")
+conn.commit()
+conn.close()
+
+app =Flask(__name__)
 chosen = ''
 @app.route("/start")
 def start():
     global chosen,tokeninfo
     tokeninfo = refreshtoken(tokeninfo)
-    print(focus)
-    chosen = random.choice(focus.keys())
+    conn = sqlite3.connect('tracks.db')
+    c = conn.cursor()
+    c.execute("select uri from lookup")
+    uris = c.fetchall()
+    chosen = random.choice(uris)[0]
     sp = spotipy.Spotify(tokeninfo['access_token'])
     sp.shuffle(True)
-    sp.start_playback(context_uri=chosen)
+    sp.start_playback(device_id=secret.DEVICE_ID,context_uri=chosen)
     return "started music\n"
 
 @app.route("/stop",methods=['GET','POST'])
@@ -86,14 +95,15 @@ def stop():
     try:
         sp.pause_playback()
     except:
-        print("DONE")
-    value = focus.get(chosen)
+        print("Couldn't stop spotify")
     if flask.request.method == 'POST':
+        t = flask.request.values.get("time")
         x = int(flask.request.values.get("focus"))
-    else:
-        x = int(input("how productive did you feel (1-5)? "))
-    focus[chosen] = x+value
-    pickle.dump(focus,open("stats.pickle","wb"))
+        conn = sqlite3.connect('tracks.db')
+        c = conn.cursor()
+        c.execute("INSERT INTO work VALUES ('" + chosen+ "'," + str(x) + "," + str(t) +")")
+        conn.commit()
+        conn.close()
     return "stopped music\n"
 
 def refreshtoken(tokeninfo):
