@@ -79,7 +79,7 @@ def start():
     tokeninfo = refreshtoken(tokeninfo)
     conn = sqlite3.connect('tracks.db')
     c = conn.cursor()
-    c.execute("select uri from lookup")
+    c.execute("SELECT lookup.uri FROM lookup LEFT JOIN work  USING(uri) group by lookup.name HAVING AVG(work.focus) > 2  UNION ALL SELECT lookup.name,work.focus FROM work LEFT JOIN lookup USING(uri) WHERE work.focus IS NULL group by lookup.name HAVING AVG(work.focus) > 2 ;")
     uris = c.fetchall()
     chosen = random.choice(uris)[0]
     sp = spotipy.Spotify(tokeninfo['access_token'])
