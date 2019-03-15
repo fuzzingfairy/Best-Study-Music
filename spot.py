@@ -76,10 +76,7 @@ chosen = ''
 @app.route("/start")
 def start():
     global chosen,tokeninfo
-    tokeninfo = refreshtoken(tokeninfo)
-    conn = sqlite3.connect('tracks.db')
-    c = conn.cursor()
-    avgGreaterThan2 = """
+      nullOrAvgGreaterThan2 = """
 SELECT lookup.uri,avg(work.focus) 
 FROM lookup 
 LEFT JOIN work  USING(uri) 
@@ -92,31 +89,41 @@ LEFT JOIN lookup USING(uri)
 WHERE work.focus IS NULL 
 GROUP BY lookup.name
 """
-    c.execute(avgGreaterThan2)
+    # check if our spotify token has expired
+    tokeninfo = refreshtoken(tokeninfo)
+    conn = sqlite3.connect('tracks.db')
+    c = conn.cursor()
+    c.execute(nullOrAvgGreaterThan2)
     uris = c.fetchall()
     conn.close()
+    # choose track from list of uris
     chosen = random.choice(uris)[0]
+    # authenticate with the spotify api
     sp = spotipy.Spotify(tokeninfo['access_token'])
     sp.shuffle(True)
+    # play back on laptop
     sp.start_playback(device_id=secret.DEVICE_ID,context_uri=chosen)
     return "started music\n"
 
 @app.route("/stop",methods=['GET','POST'])
 def stop():
     global tokeninfo
+    # check if we need to refresh our spotify token
     tokeninfo = refreshtoken(tokeninfo)
     sp = spotipy.Spotify(tokeninfo['access_token'])
     try:
+        # try to pause music
         sp.pause_playback()
     except:
         print("Couldn't stop spotify")
     if flask.request.method == 'POST':
-        t = flask.request.values.get("time")
-        x = int(flask.request.values.get("focus"))
-        if x > 0 :
+        time = flask.request.values.get("time")
+        rating = int(flask.request.values.get("focus"))
+	# check if rating is  non zero
+        if rating > 0 :
             conn = sqlite3.connect('tracks.db')
             c = conn.cursor()
-            c.execute("INSERT INTO work VALUES ('" + chosen+ "'," + str(x) + "," + str(t) +")")
+            c.execute("INSERT INTO work VALUES ('" + chosen+ "'," + str(rating) + "," + str(time) +")")
             conn.commit()
             conn.close()
     return "stopped music\n"
