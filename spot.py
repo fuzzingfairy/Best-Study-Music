@@ -79,7 +79,8 @@ def start():
     tokeninfo = refreshtoken(tokeninfo)
     conn = sqlite3.connect('tracks.db')
     c = conn.cursor()
-    c.execute("SELECT lookup.uri FROM lookup LEFT JOIN work  USING(uri) group by lookup.name HAVING AVG(work.focus) > 2  UNION ALL SELECT lookup.name,work.focus FROM work LEFT JOIN lookup USING(uri) WHERE work.focus IS NULL group by lookup.name HAVING AVG(work.focus) > 2 ;")
+    avgGreaterThan2 = "SELECT lookup.name,avg(work.focus) FROM lookup LEFT JOIN work  USING(uri) group by lookup.name  HAVING avg(work.focus) > 1 or avg(work.focus) is NULL UNION ALL SELECT lookup.name,avg(work.focus) FROM work LEFT JOIN lookup USING(uri) WHERE work.focus IS NULL group by lookup.name ;"
+    c.execute(avgGreaterThan2)
     uris = c.fetchall()
     chosen = random.choice(uris)[0]
     sp = spotipy.Spotify(tokeninfo['access_token'])
@@ -98,8 +99,8 @@ def stop():
         print("Couldn't stop spotify")
     if flask.request.method == 'POST':
         t = flask.request.values.get("time")
+        x = int(flask.request.values.get("focus"))
         if x > 0 :
-            x = int(flask.request.values.get("focus"))
             conn = sqlite3.connect('tracks.db')
             c = conn.cursor()
             c.execute("INSERT INTO work VALUES ('" + chosen+ "'," + str(x) + "," + str(t) +")")
@@ -114,3 +115,5 @@ def refreshtoken(tokeninfo):
     
 if __name__ == '__main__':
    app.run()
+
+  
