@@ -79,9 +79,22 @@ def start():
     tokeninfo = refreshtoken(tokeninfo)
     conn = sqlite3.connect('tracks.db')
     c = conn.cursor()
-    avgGreaterThan2 = "SELECT lookup.uri,avg(work.focus) FROM lookup LEFT JOIN work  USING(uri) group by lookup.name  HAVING avg(work.focus) > 1 or avg(work.focus) is NULL UNION ALL SELECT lookup.uri,avg(work.focus) FROM work LEFT JOIN lookup USING(uri) WHERE work.focus IS NULL group by lookup.name ;"
+    avgGreaterThan2 = """
+SELECT lookup.uri,avg(work.focus) 
+FROM lookup 
+LEFT JOIN work  USING(uri) 
+GROUP BY lookup.name  
+HAVING avg(work.focus) > 2 or avg(work.focus) is NULL 
+UNION ALL 
+SELECT lookup.uri,avg(work.focus) 
+FROM work 
+LEFT JOIN lookup USING(uri) 
+WHERE work.focus IS NULL 
+GROUP BY lookup.name
+"""
     c.execute(avgGreaterThan2)
     uris = c.fetchall()
+    conn.close()
     chosen = random.choice(uris)[0]
     sp = spotipy.Spotify(tokeninfo['access_token'])
     sp.shuffle(True)
