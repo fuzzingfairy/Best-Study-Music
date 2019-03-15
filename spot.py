@@ -79,7 +79,7 @@ def start():
     tokeninfo = refreshtoken(tokeninfo)
     conn = sqlite3.connect('tracks.db')
     c = conn.cursor()
-    avgGreaterThan2 = "SELECT lookup.name,avg(work.focus) FROM lookup LEFT JOIN work  USING(uri) group by lookup.name  HAVING avg(work.focus) > 1 or avg(work.focus) is NULL UNION ALL SELECT lookup.name,avg(work.focus) FROM work LEFT JOIN lookup USING(uri) WHERE work.focus IS NULL group by lookup.name ;"
+    avgGreaterThan2 = "SELECT lookup.uri,avg(work.focus) FROM lookup LEFT JOIN work  USING(uri) group by lookup.name  HAVING avg(work.focus) > 1 or avg(work.focus) is NULL UNION ALL SELECT lookup.uri,avg(work.focus) FROM work LEFT JOIN lookup USING(uri) WHERE work.focus IS NULL group by lookup.name ;"
     c.execute(avgGreaterThan2)
     uris = c.fetchall()
     chosen = random.choice(uris)[0]
