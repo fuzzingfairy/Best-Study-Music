@@ -49,14 +49,6 @@ for i in names:
         playlist_id = i.split(':')[2]
         playnames.append(sp.user_playlist(username, playlist_id)["name"])
 
-conn = sqlite3.connect('tracks.db')
-c = conn.cursor()
-for i in range(len(playnames)):
-    print(playnames[i] + " " + str(values[i]) + " names " + str(names[i]))
-    c.execute("INSERT INTO lookup VALUES ('" +names[i]+"','"+ playnames[i] +"');")
-conn.commit()
-conn.close()
-
 def getName(uri):
     try:
         username = i.split(':')[2]
@@ -66,3 +58,9 @@ def getName(uri):
         username = "spotify"
         playlist_id = i.split(':')[2]
         return sp.user_playlist(username, playlist_id)["name"]
+
+conn = sqlite3.connect("tracks.db")
+c = conn.cursor()
+c.execute("select lookup.name,avg(work.focus),avg(work.time) from lookup inner join work on lookup.uri = work.uri group by lookup.uri;")
+x = c.fetchall()
+import pdb; pdb.set_trace()

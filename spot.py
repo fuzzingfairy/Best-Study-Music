@@ -76,7 +76,7 @@ chosen = ''
 @app.route("/start")
 def start():
     global chosen,tokeninfo
-      nullOrAvgGreaterThan2 = """
+    nullOrAvgGreaterThan2 = """
 SELECT lookup.uri,avg(work.focus) 
 FROM lookup 
 LEFT JOIN work  USING(uri) 
