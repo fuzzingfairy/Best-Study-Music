@@ -6,11 +6,9 @@ import spotipy
 import spotipy.util as util
 import sqlite3
 import secret
+import matplotlib.pyplot as plt
+import random
 
-focus = pickle.load(open("stats.pickle","rb"))
-sorted_x = sorted(focus.items(), key=operator.itemgetter(1))
-names = [i[0] for i in sorted_x][::-1]
-values =[i[1] for i in sorted_x][::-1]
     
     # Log in to spotify
 CACHE = '.spotipyoauthcache'
@@ -38,16 +36,6 @@ spotifyoauth= spotipy.oauth2.SpotifyOAuth(client_id=secret.CLIENT_ID,client_secr
 tokeninfo = spotifyoauth.get_cached_token()
 sp = spotipy.Spotify(tokeninfo['access_token'])
 
-playnames = []
-for i in names:
-    try:
-        username = i.split(':')[2]
-        playlist_id = i.split(':')[4]
-        playnames.append(sp.user_playlist(username, playlist_id)["name"])
-    except:
-        username = "spotify"
-        playlist_id = i.split(':')[2]
-        playnames.append(sp.user_playlist(username, playlist_id)["name"])
 
 def getName(uri):
     try:
@@ -61,6 +49,31 @@ def getName(uri):
 
 conn = sqlite3.connect("tracks.db")
 c = conn.cursor()
-c.execute("select lookup.name,avg(work.focus),avg(work.time) from lookup inner join work on lookup.uri = work.uri group by lookup.uri;")
-x = c.fetchall()
-import pdb; pdb.set_trace()
+q ="""
+select lookup.name,avg(work.focus),avg(work.time) from lookup inner join work on lookup.uri = work.uri where  group by lookup.uri ; 
+"""
+c.execute(q)
+data = c.fetchall()
+m = ('o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X')
+x = [ ]
+y = [ ]
+names = []
+for i in data:
+    names.append(i[0])
+    x.append(i[2])
+    y.append(i[1])
+fig, ax = plt.subplots()
+#ax.scatter(x,y)
+print("DONE")
+label = 1
+for i, name in enumerate(names):
+    ax.scatter(x[i],y[i],label=names[i],marker=m[ i % len(m)])
+    """
+for i, name in enumerate(names):
+    label = ax.annotate(name, (x[i], y[i]), ha='center', va='center')
+"""
+    ax.legend()
+plt.title('Average Rating vs Average Time')
+plt.ylabel('Average Rating (1-5)')
+plt.xlabel('Average Time (minutes)')
+plt.show()
