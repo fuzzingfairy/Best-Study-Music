@@ -102,7 +102,10 @@ GROUP BY lookup.name
     sp = spotipy.Spotify(tokeninfo['access_token'])
     sp.shuffle(True)
     # play back on laptop
-    sp.start_playback(device_id=secret.DEVICE_ID,context_uri=chosen)
+    if secret.DEVICE_ID:
+        sp.start_playback(device_id=secret.DEVICE_ID,context_uri=chosen)
+    else:
+        sp.start_playback(context_uri=chosen)
     return "started music\n"
 
 @app.route("/stop",methods=['GET','POST'])
