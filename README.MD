@@ -1,2 +1,9 @@
-# Study Music Finder
-[write up](https://alicereuter.com/posts/Study%20Music%20Finder.html)
+# Quick start
+To get started you'll need to install [spotipy](https://spotipy.readthedocs.io/en/latest/#) and then sign up for a spotify [developer's](https://developer.spotify.com/) account. Add your client id and client secret to secrets.py.
+
+When you first run the server it will prompt you through spotify's authentication process. It will then cache your tokens so you won't have to go through it again.
+
+The script will then populate the database with the most popular songs in the Focus genre. To play make a get request to `localhost:5000/start` make sure the spotify client is open so that the server can communicate with it. Enjoy the music!
+
+## more detailed write up
+[<img src="https://s3.amazonaws.com/alicereuter.com/assets/img/song/Screencap.png">](https://alicereuter.com/posts/Study%20Music%20Finder.html)
