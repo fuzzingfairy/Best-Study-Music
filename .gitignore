@@ -1,5 +1,4 @@
 *.pyc
-secret.py
 tracks.db
 .DS_STORE
 .cache*
