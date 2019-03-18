@@ -3,3 +3,4 @@ tracks.db
 .DS_STORE
 .cache*
 .spot*
+.sqbpro
