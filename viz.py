@@ -49,11 +49,9 @@ def getName(uri):
 
 conn = sqlite3.connect("tracks.db")
 c = conn.cursor()
-q ="""
-select lookup.name,avg(work.focus),avg(work.time) from lookup inner join work on lookup.uri = work.uri where  group by lookup.uri ; 
-"""
+q ="""select lookup.name,avg(work.focus),avg(work.time) from lookup inner join work on lookup.uri = work.uri  group by lookup.uri order by avg(work.time) desc; """
 c.execute(q)
-data = c.fetchall()
+data = c.fetchall()[:10]
 m = ('o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X')
 x = [ ]
 y = [ ]
