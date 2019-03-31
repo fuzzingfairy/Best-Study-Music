@@ -47,11 +47,31 @@ def getName(uri):
         playlist_id = i.split(':')[2]
         return sp.user_playlist(username, playlist_id)["name"]
 
+
+
+    
 conn = sqlite3.connect("tracks.db")
 c = conn.cursor()
+q = """SELECT lookup.name,avg(work.focus) 
+FROM lookup 
+LEFT JOIN work  USING(uri) 
+GROUP BY lookup.name  
+UNION ALL 
+SELECT lookup.uri,avg(work.focus) 
+FROM work 
+LEFT JOIN lookup USING(uri) 
+WHERE work.focus IS NULL 
+GROUP BY lookup.name ORDER  by avg(work.focus) Desc;"""
+c.execute(q)
+data = c.fetchall()
+for i in data:
+    print("%-20s %s" % (i[0], i[1]))
+
+
+
 q ="""select lookup.name,avg(work.focus),avg(work.time) from lookup inner join work on lookup.uri = work.uri  group by lookup.uri order by avg(work.time) desc; """
 c.execute(q)
-data = c.fetchall()[:10]
+data = c.fetchall()
 m = ('o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X')
 x = [ ]
 y = [ ]
@@ -65,7 +85,7 @@ fig, ax = plt.subplots()
 print("DONE")
 label = 1
 for i, name in enumerate(names):
-    ax.scatter(x[i],y[i],label=names[i],marker=m[ i % len(m)])
+    ax.scatter(x[i],y[i])
     """
 for i, name in enumerate(names):
     label = ax.annotate(name, (x[i], y[i]), ha='center', va='center')
@@ -75,3 +95,4 @@ plt.title('Average Rating vs Average Time')
 plt.ylabel('Average Rating (1-5)')
 plt.xlabel('Average Time (minutes)')
 plt.show()
+
