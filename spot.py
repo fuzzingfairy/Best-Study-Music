@@ -2,14 +2,13 @@ import spotipy
 import spotipy.util as util
 import random
 import time
-import thread
 from flask import Flask
 import flask
 import sqlite3
 import secret
 
 
-CACHE = '.spotipyoauthcache'
+CACHE = '/home/alice/spotify/.spotipyoauthcache'
 
 scope   ="""user-read-email
     playlist-read-private
@@ -58,7 +57,7 @@ def getName(uri):
         playlist_id = uri.split(':')[2]
         return sp.user_playlist(username, playlist_id)["name"]
 
-conn = sqlite3.connect('tracks.db')
+conn = sqlite3.connect('/home/alice/spotify/tracks.db')
 c = conn.cursor()
     
 for i in sp.search("focus",type='playlist')['playlists']['items']:
@@ -132,7 +131,7 @@ def stop():
     return "stopped music\n"
 
 def refreshtoken(tokeninfo):
-    if(spotifyoauth.is_token_expired(tokeninfo)):
+    if(spotipy.oauth2.is_token_expired(tokeninfo)):
         tokeninfo = spotifyoauth.refresh_access_token(tokeninfo['refresh_token'])
     return tokeninfo
     
