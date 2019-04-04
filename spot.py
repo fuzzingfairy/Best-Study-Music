@@ -43,7 +43,7 @@ if not tokeninfo:
     responsecode = spotifyoauth.parse_response_code(url)
     tokeninfo = spotifyoauth.get_access_token(responsecode)
     
-print("searchin for new playlists")
+print("Searching for new playlists to add")
 
 sp = spotipy.Spotify(tokeninfo['access_token'])
 
@@ -65,7 +65,7 @@ for i in sp.search("focus",type='playlist')['playlists']['items']:
     found = c.fetchone()
     if not found:
         name = getName(i['uri'])
-        print("adding playlist " + name)
+        print("Adding playlist " + name)
         c.execute("INSERT INTO LOOKUP VALUES ('"+ i['uri'] + "','" + name + "')")
 conn.commit()
 conn.close()
@@ -90,7 +90,7 @@ GROUP BY lookup.name
 """
     # check if our spotify token has expired
     tokeninfo = refreshtoken(tokeninfo)
-    conn = sqlite3.connect('tracks.db')
+    conn = sqlite3.connect('/home/alice/spotify/tracks.db')
     c = conn.cursor()
     c.execute(nullOrAvgGreaterThan2)
     uris = c.fetchall()
@@ -123,7 +123,7 @@ def stop():
         rating = int(flask.request.values.get("focus"))
 	# check if rating is  non zero
         if rating > 0 :
-            conn = sqlite3.connect('tracks.db')
+            conn = sqlite3.connect('/home/alice/spotify/tracks.db')
             c = conn.cursor()
             c.execute("INSERT INTO work VALUES ('" + chosen+ "'," + str(rating) + "," + str(time) +")")
             conn.commit()
