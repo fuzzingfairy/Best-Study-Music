@@ -36,6 +36,7 @@ spotifyoauth= spotipy.oauth2.SpotifyOAuth(client_id=secret.CLIENT_ID,client_secr
 tokeninfo = spotifyoauth.get_cached_token()
 sp = spotipy.Spotify(tokeninfo['access_token'])
 
+print(sp.devices())
 
 def getName(uri):
     try:
