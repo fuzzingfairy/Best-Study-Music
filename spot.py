@@ -99,8 +99,11 @@ GROUP BY lookup.name
     chosen = random.choice(uris)[0]
     # authenticate with the spotify api
     sp = spotipy.Spotify(tokeninfo['access_token'])
-    sp.shuffle(True)
-    # play back on laptop
+    try:
+        sp.shuffle(True)
+    except Exception as e:
+        return str(e)
+        # play back on laptop
     if secret.DEVICE_ID:
         sp.start_playback(device_id=secret.DEVICE_ID,context_uri=chosen)
     else:
