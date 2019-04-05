@@ -70,6 +70,28 @@ for i in data:
 
 
 
+q ="""select lookup.name,work.focus,work.time from lookup inner join work on lookup.uri = work.uri  group by lookup.uri order by avg(work.time) desc; """
+c.execute(q)
+data = c.fetchall()
+m = ('o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X')
+x = [ ]
+y = [ ]
+names = []
+for i in data:
+    names.append(i[0])
+    x.append(i[2])
+    y.append(i[1])
+fig, ax = plt.subplots()
+#ax.scatter(x,y)
+print("DONE")
+label = 1
+colors= (0,0,0)
+plt.scatter(x,y,c=colors)
+plt.title('Rating vs Time')
+plt.ylabel('Rating (1-5)')
+plt.xlabel('Time (minutes)')
+plt.show()
+
 q ="""select lookup.name,avg(work.focus),avg(work.time) from lookup inner join work on lookup.uri = work.uri  group by lookup.uri order by avg(work.time) desc; """
 c.execute(q)
 data = c.fetchall()
@@ -85,13 +107,8 @@ fig, ax = plt.subplots()
 #ax.scatter(x,y)
 print("DONE")
 label = 1
-for i, name in enumerate(names):
-    ax.scatter(x[i],y[i])
-    """
-for i, name in enumerate(names):
-    label = ax.annotate(name, (x[i], y[i]), ha='center', va='center')
-"""
-    ax.legend()
+colors= (0,0,0)
+plt.scatter(x,y,c=colors)
 plt.title('Average Rating vs Average Time')
 plt.ylabel('Average Rating (1-5)')
 plt.xlabel('Average Time (minutes)')
