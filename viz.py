@@ -68,7 +68,7 @@ data = c.fetchall()
 for i in data:
     print("%-20s %s" % (i[0], i[1]))
 
-def graph(data,title,yl,xl):
+def graph(data,title,yl,xl,f):
     x = [ ]
     y = [ ]
     names = []
@@ -78,7 +78,7 @@ def graph(data,title,yl,xl):
         y.append(i[1])
     fig, ax = plt.subplots()
     ax.set_facecolor('#303030')
-    fig.patch.set_facecolor('#303030')
+   # fig.patch.set_facecolor('#303030')
     ax.spines['bottom'].set_color('#c6c6c6')
     ax.spines['top'].set_color('#c6c6c6')
     ax.spines['right'].set_color('#c6c6c6')
@@ -95,18 +95,18 @@ def graph(data,title,yl,xl):
     plt.title(title)
     plt.ylabel(yl)
     plt.xlabel(xl)
-    plt.show()
+    plt.savefig(f,facecolor='#303030')
 
 
 q ="""select lookup.name,work.focus,work.time from lookup inner join work on lookup.uri = work.uri  group by lookup.uri order by avg(work.time) desc; """
 c.execute(q)
 data = c.fetchall()
-graph(data,'Rating vs Time','Rating (1-5)','Time (minutes)')
+graph(data,'Rating vs Time','Rating (1-5)','Time (minutes)',"rating.png")
 
 
 q ="""select lookup.name,avg(work.focus),avg(work.time) from lookup inner join work on lookup.uri = work.uri  group by lookup.uri order by avg(work.time) desc; """
 c.execute(q)
 data = c.fetchall()
-graph(data,'Average Rating vs Average Time','Average Rating (1-5)','Average Time (minutes)')
+graph(data,'Average Rating vs Average Time','Average Rating (1-5)','Average Time (minutes)',"avg.png")
 
 
