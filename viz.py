@@ -68,49 +68,45 @@ data = c.fetchall()
 for i in data:
     print("%-20s %s" % (i[0], i[1]))
 
+def graph(data,title,yl,xl):
+    x = [ ]
+    y = [ ]
+    names = []
+    for i in data:
+        names.append(i[0])
+        x.append(i[2])
+        y.append(i[1])
+    fig, ax = plt.subplots()
+    ax.set_facecolor('#303030')
+    fig.patch.set_facecolor('#303030')
+    ax.spines['bottom'].set_color('#c6c6c6')
+    ax.spines['top'].set_color('#c6c6c6')
+    ax.spines['right'].set_color('#c6c6c6')
+    ax.spines['left'].set_color('#c6c6c6')
+    ax.tick_params(axis='x', colors='#c6c6c6')
+    ax.tick_params(axis='y', colors='#c6c6c6')
+    ax.yaxis.label.set_color('#c6c6c6')
+    ax.xaxis.label.set_color('#c6c6c6')
+    ax.title.set_color('#ff4ea3')
+    #ax.scatter(x,y)
+    label = 1
+    colors= "#a020f0"
+    plt.scatter(x,y,c=colors)
+    plt.title(title)
+    plt.ylabel(yl)
+    plt.xlabel(xl)
+    plt.show()
 
 
 q ="""select lookup.name,work.focus,work.time from lookup inner join work on lookup.uri = work.uri  group by lookup.uri order by avg(work.time) desc; """
 c.execute(q)
 data = c.fetchall()
-m = ('o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X')
-x = [ ]
-y = [ ]
-names = []
-for i in data:
-    names.append(i[0])
-    x.append(i[2])
-    y.append(i[1])
-fig, ax = plt.subplots()
-#ax.scatter(x,y)
-print("DONE")
-label = 1
-colors= (0,0,0)
-plt.scatter(x,y,c=colors)
-plt.title('Rating vs Time')
-plt.ylabel('Rating (1-5)')
-plt.xlabel('Time (minutes)')
-plt.show()
+graph(data,'Rating vs Time','Rating (1-5)','Time (minutes)')
+
 
 q ="""select lookup.name,avg(work.focus),avg(work.time) from lookup inner join work on lookup.uri = work.uri  group by lookup.uri order by avg(work.time) desc; """
 c.execute(q)
 data = c.fetchall()
-m = ('o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X')
-x = [ ]
-y = [ ]
-names = []
-for i in data:
-    names.append(i[0])
-    x.append(i[2])
-    y.append(i[1])
-fig, ax = plt.subplots()
-#ax.scatter(x,y)
-print("DONE")
-label = 1
-colors= (0,0,0)
-plt.scatter(x,y,c=colors)
-plt.title('Average Rating vs Average Time')
-plt.ylabel('Average Rating (1-5)')
-plt.xlabel('Average Time (minutes)')
-plt.show()
+graph(data,'Average Rating vs Average Time','Average Rating (1-5)','Average Time (minutes)')
+
 
