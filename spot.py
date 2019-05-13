@@ -6,10 +6,12 @@ from flask import Flask
 import flask
 import sqlite3
 import secret
+import os
+OSPATH = os.path.dirname(os.path.abspath(__file__))
 
+CACHE = OSPATH +'/.spotipyoauthcache'
+DBLOCATION = OSPATH +'/tracks.db'
 
-CACHE = '/home/alice/Best-Study-Music/.spotipyoauthcache'
-DBLOCATION = '/home/alice/Best-Study-Music/tracks.db'
 scope   ="""user-read-email
     playlist-read-private
     playlist-modify-private
