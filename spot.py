@@ -8,8 +8,8 @@ import sqlite3
 import secret
 
 
-CACHE = '/home/alice/spotify/.spotipyoauthcache'
-
+CACHE = '/home/alice/Best-Study-Music/.spotipyoauthcache'
+DBLOCATION = '/home/alice/Best-Study-Music/tracks.db'
 scope   ="""user-read-email
     playlist-read-private
     playlist-modify-private
@@ -57,7 +57,7 @@ def getName(uri):
         playlist_id = uri.split(':')[2]
         return sp.user_playlist(username, playlist_id)["name"]
 
-conn = sqlite3.connect('/home/alice/spotify/tracks.db')
+conn = sqlite3.connect(DBLOCATION)
 c = conn.cursor()
     
 for i in sp.search("focus",type='playlist')['playlists']['items']:
@@ -74,7 +74,7 @@ app =Flask(__name__)
 chosen = ''
 @app.route("/start")
 def start():
-    global chosen,tokeninfo
+    global tokeninfo
     nullOrAvgGreaterThan2 = """
 SELECT lookup.uri,avg(work.focus) 
 FROM lookup 
@@ -90,7 +90,7 @@ GROUP BY lookup.name
 """
     # check if our spotify token has expired
     tokeninfo = refreshtoken(tokeninfo)
-    conn = sqlite3.connect('/home/alice/spotify/tracks.db')
+    conn = sqlite3.connect(DBLOCATION)
     c = conn.cursor()
     c.execute(nullOrAvgGreaterThan2)
     uris = c.fetchall()
@@ -116,6 +116,7 @@ def stop():
     # check if we need to refresh our spotify token
     tokeninfo = refreshtoken(tokeninfo)
     sp = spotipy.Spotify(tokeninfo['access_token'])
+    chosen = sp.current_user_playing_track()['context']['uri']
     try:
         # try to pause music
         sp.pause_playback()
@@ -126,7 +127,7 @@ def stop():
         rating = int(flask.request.values.get("focus"))
 	# check if rating is  non zero
         if rating > 0 :
-            conn = sqlite3.connect('/home/alice/spotify/tracks.db')
+            conn = sqlite3.connect(DBLOCATION)
             c = conn.cursor()
             c.execute("INSERT INTO work VALUES ('" + chosen+ "'," + str(rating) + "," + str(time) +")")
             conn.commit()
