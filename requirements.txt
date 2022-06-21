@@ -22,7 +22,7 @@ jmespath==0.9.4
 kiwisolver==1.0.1
 MarkupSafe==1.1.0
 matplotlib==2.2.3
-numpy==1.16.1
+numpy==1.22.0
 pyasn1==0.4.5
 pycparser==2.18
 pyOpenSSL==19.0.0
